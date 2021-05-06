@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState } from 'react';
 
-import '../styles/tasklist.scss'
+import '../styles/tasklist.scss';
 
-import { FiTrash, FiCheckSquare } from 'react-icons/fi'
+import { FiTrash, FiCheckSquare } from 'react-icons/fi';
 
 interface Task {
   id: number;
@@ -16,59 +16,103 @@ export function TaskList() {
 
   function handleCreateNewTask() {
     // Crie uma nova task com um id random, não permita criar caso o título seja vazio.
+
+    // Garantindo que não serão validos os títulos em branco
+    let verificationValidTask = newTaskTitle.replace(/\s/g, '');
+    if (verificationValidTask.length > 0) {
+      // Pegando garantindo ID único para cada task
+      while (1) {
+        let taskId = Math.floor((new Date().getTime() / 1000) * Math.random());
+        let idValidate = tasks.every((item, index) => {
+          return item.id !== taskId;
+        });
+        if (idValidate) {
+          // removendo espaços no começo e no final da string
+          let taskTitleTreated = newTaskTitle.trim();
+          setTasks([
+            ...tasks,
+            { id: taskId, title: taskTitleTreated, isComplete: false },
+          ]);
+          break;
+        }
+      }
+    }
   }
 
   function handleToggleTaskCompletion(id: number) {
     // Altere entre `true` ou `false` o campo `isComplete` de uma task com dado ID
+    let tasksChanged = tasks.map((item) => {
+      if(item.id == id)return {id: item.id, title: item.title, isComplete: !item.isComplete}
+      return item
+    })
+    
+    setTasks(tasksChanged)
+
   }
 
   function handleRemoveTask(id: number) {
     // Remova uma task da listagem pelo ID
+    let tasksChanged = tasks.filter((item) => {
+      if(item.id !== id)return item
+    })
+
+    setTasks(tasksChanged)
+
   }
 
   return (
-    <section className="task-list container">
+    <section className='task-list container'>
       <header>
         <h2>Minhas tasks</h2>
 
-        <div className="input-group">
-          <input 
-            type="text" 
-            placeholder="Adicionar novo todo" 
+        <div className='input-group'>
+          <input
+            type='text'
+            placeholder='Adicionar novo todo'
             onChange={(e) => setNewTaskTitle(e.target.value)}
             value={newTaskTitle}
           />
-          <button type="submit" data-testid="add-task-button" onClick={handleCreateNewTask}>
-            <FiCheckSquare size={16} color="#fff"/>
+          <button
+            type='submit'
+            data-testid='add-task-button'
+            onClick={handleCreateNewTask}
+          >
+            <FiCheckSquare size={16} color='#fff' />
           </button>
         </div>
       </header>
 
       <main>
         <ul>
-          {tasks.map(task => (
+          {tasks.map((task) => (
             <li key={task.id}>
-              <div className={task.isComplete ? 'completed' : ''} data-testid="task" >
-                <label className="checkbox-container">
-                  <input 
-                    type="checkbox"
+              <div
+                className={task.isComplete ? 'completed' : ''}
+                data-testid='task'
+              >
+                <label className='checkbox-container'>
+                  <input
+                    type='checkbox'
                     readOnly
                     checked={task.isComplete}
                     onClick={() => handleToggleTaskCompletion(task.id)}
                   />
-                  <span className="checkmark"></span>
+                  <span className='checkmark'></span>
                 </label>
                 <p>{task.title}</p>
               </div>
 
-              <button type="button" data-testid="remove-task-button" onClick={() => handleRemoveTask(task.id)}>
-                <FiTrash size={16}/>
+              <button
+                type='button'
+                data-testid='remove-task-button'
+                onClick={() => handleRemoveTask(task.id)}
+              >
+                <FiTrash size={16} />
               </button>
             </li>
           ))}
-          
         </ul>
       </main>
     </section>
-  )
+  );
 }
